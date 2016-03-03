@@ -3,7 +3,7 @@
 ------------------------------
 
 - 翻译人：徐维涛
-- 翻译周期：2016-03-02~2016-03-02
+- 翻译周期：2016-03-03~2016-03-05
 - 中文译名：Django中编写和执行测试
 - 原标题和链接：[Writing and running tests](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)
 - 说明：`Django1.9`官方文档翻译
@@ -13,8 +13,11 @@
 -------------------------------
 
 >相关文档链接：
+
 >- [测试教程](https://docs.djangoproject.com/en/1.9/intro/tutorial05/)
+
 >- [测试工具参考](https://docs.djangoproject.com/en/1.9/topics/testing/tools/)
+
 >- [进阶测试专题](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)
 
 

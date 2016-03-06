@@ -77,3 +77,50 @@ class AnimalTestCase(TestCase):
 ```bash
 $ ./manage.py test
 ```
+
+对测试文件的识别是基于单元测试模块的内置的测试发现功能。默认情况下，这条命令将发现当前工作目录下所有以`test`开头的脚本文件中的测试代码。
+
+你可以通过新添任意数量的“测试标签”到`./manage.py test`命令之后去指定特定的测试运行。每一个测试标签可以是一个`Python`包、模块、测试用例子类或者测试方法的以点分隔得全路径。例如：
+
+```bash
+# Run all the tests in the animals.tests module
+$ ./manage.py test animals.tests
+
+# Run all the tests found within the 'animals' package
+$ ./manage.py test animals
+
+# Run just one test case
+$ ./manage.py test animals.tests.AnimalTestCase
+
+# Run just one test method
+$ ./manage.py test animals.tests.AnimalTestCase.test_animals_can_speak
+```
+
+
+你也可以提供一个目录的路径去发现这个路径下的测试：
+
+```bash
+$ ./manage.py test animals/
+```
+
+如果你的测试文件没被命名为`test*.py`模式的文件名，你可以通过`-p`选项（或者`--pattern`）来自定义一个文件模式匹配名来匹配测试文件。例如：
+
+```bash
+$ ./manage.py test --pattern="tests_*.py"
+```
+
+当测试正在运行的时候，如果你按下`Ctrl-C`，它会等待当前正在跑的测试单元执行完毕然后优雅的退出，同时会输出所有测试失败的有关细节信息，报告有多少个测试用例被执行，其中有多少个失败、多少个错误，然后照常清除掉测试用的数据库。有时候，有一些测试会意外的出错，你可能想在所有的测试都跑完前获取一些有关这些错误的细节，因此如果你忘记给测试命令加上[`--failfast`](https://docs.djangoproject.com/en/1.9/ref/django-admin/#cmdoption-test--failfast)选项的话，按下`Ctrl-C`是非常有效的。
+
+如果你不想等到当前正在跑的测试单元结束，你可以再按下一次`Ctrl-C`，然后测试会立即停止，但是这样很不优雅。所有在测试中断前的详细信息都不会被报告出来，而且所有由这次测试创建的数据库都不会被清除掉。
+
+>**测试打开警告功能**
+
+>在跑你的测试时，建议打开`Python`的警告功能：`python -Wall manage.py test`。这个`-Wall`标记告诉`Python`去显示一些警告消息。`Django`和`Python`很多其他的库一样，当一些功能已经不支持时，使用这些警告去标记它们。它也可以标记出你代码中虽然严格来讲没有错，但是可以优化的地方。
+
+###测试用的数据库
+
+当你的测试需要数据库支持时，换句话说，进行模型测试时，不会使用你真实的（生产）数据库，而是为测试新建一个全新的空的数据库（我在下文称之为**测试用数据库**）。
+
+无论测试通过与否，在测试执行完毕时，都会清除掉测试用数据库。
+
+

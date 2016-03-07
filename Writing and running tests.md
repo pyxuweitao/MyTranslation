@@ -123,4 +123,74 @@ $ ./manage.py test --pattern="tests_*.py"
 
 无论测试通过与否，在测试执行完毕时，都会清除掉测试用数据库。
 
+>**`Django`1.8的新特性**
 
+>你可以使用[`test --keepdb`](https://docs.djangoproject.com/en/1.9/ref/django-admin/#cmdoption-test--keepdb)选项来让测试用数据库不被清除。这将让测试用数据库在测试执行的时候一直保留。如果数据库不存在，它将首先被创建。为了保证数据库是最新的，任何有关数据库的迁移或变动也将被应用到测试用数据库。
+
+默认情况下，测试用数据库的名字会以[**DATABASES**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DATABASES)中的[**NAME**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-NAME)
+为基准，在它前边加上`test_`前缀。当在使用**SQLite**的时候，测试将默认使用内存数据库（也就是说，数据库将被在内存中创建，完全绕过文件系统）。在[**DATABASES**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DATABASES)配置字典中，你可以添加一个[**`TEST`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DATABASE-TEST)字典来配置测试用数据库。举个栗子，如果你想使用不同于默认名的测试用数据库名，可以在[**DATABASES**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DATABASES)中每个给出的数据库的[**`TEST`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DATABASE-TEST)字典中指定它们对应的数据库名[**NAME**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-TEST_NAME)。
+
+使用**PostgreSQL**时，数据库配置中的[**USER**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-USER)用户还需要内建**postgres**数据库的访问读权限。
+
+除了使用一个独立分离的数据库之外，测试数据库会同样使用你配置文件中所有数据库相关配置：[**ENGINE**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DATABASE-ENGINE)，[**USER**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-USER)，[**HOST**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-HOST)等等。测试用数据库是由配置中的[**USER**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-USER)用户创建，因此你需要确保该用户有足够的权限在操作系统中创建一个新的数据库。
+
+
+如果你需要对数据库的编码进行细粒度的控制，可以在**`TEST`**配置字典中使用[**CHARSET**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-TEST_CHARSET)选项。如果你正在使用**MySQL**，你还可以使用[**COLLATION**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-TEST_COLLATION)选项去指定测试用数据库的排序规则。请参阅[**setting 文档**](https://docs.djangoproject.com/en/1.9/ref/settings/)获取更多进阶的配置的细节。
+
+如果将**SQLite**内存数据库（3.7.13+）和`Python`（3.4+）搭配使用，共享高速缓存会被启用，所以你就可以编写能够在线程间共享数据库的测试了。
+
+>**`Django`1.8的新特性**
+
+>上边提到的有关**SQLite**共享高速缓存的功能已经实现。
+
+
+>**执行测试的时候需要生产数据库中的数据？**
+
+>如果你的代码模块在被编译后试图去访问数据库，这将导致测试用数据库创建之前的一些潜在的意外的结果。举个栗子，如果你在模块级(`module-level`)的代码中写了一个数据库的查询，并且数据库的确存在，生产数据可能破坏你的测试。无论如何我们都不推荐在你的代码中有类似的`import-time`数据库查询。
+
+>这条原则同样适用于[`ready()`](https://docs.djangoproject.com/en/1.9/ref/applications/#django.apps.AppConfig.ready)的自定义实现。
+
+>**另请参阅**
+
+>[多数据库测试进阶](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#topics-testing-advanced-multidb)
+
+-----------------------------
+
+###测试执行的顺序
+
+为了确保所有的测试用例代码开始执行的时候都使用没有脏数据的数据库，`Django`按照以下原则来给测试重新排序：
+
+- 所有[**TestCase**](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.TestCase)的子类首先执行
+- 然后，执行所有其他基于`Django`的测试（继承自[`SimpleTestCase`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.SimpleTestCase)或者[`TransactionTestCase`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.TransactionTestCase)的子类），但是执行的时候既不会保证也不会强制对它们进行排序。
+- 最后执行所有其他的继承自[`unittest.TestCase`](https://docs.python.org/3/library/unittest.html#unittest.TestCase)的测试（包括文档测试），这些测试可以会修改数据库但是并不会在测试结束后恢复数据库到测试之前的状态。
+
+
+>**注解**
+
+>测试执行的新顺序可以暴露出测试对于执行顺序的意想不到的依赖。当存在依赖于数据库状态的[`TransactionTestCase`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.TransactionTestCase)类测试时，它们必须被及时更新以确保各个测试能够独立运行。
+
+>**`Django`1.8的新特性**
+
+>通过使用`test --reverse`选项，你可以倒序执行所有测试。这将帮助你确保你的测试之间是相互独立的。
+
+-------------------
+
+###仿真回滚
+
+任何初始数据，而且只可以在支持事务的数据库（最重要的例外：`MyISAM`）
+
+通过在`TestCase`或者`TransactionTestCase`的子类定义体中设置`serialized_rollback`选项为`True`，`Django`就可以为一个测试用例执重新从数据库载入数据，但是请注意这将减慢测试套件三倍左右的运行速度。
+
+第三方应用或者那些倚靠`MyISM`的开发将会需要设置上边提到的。但是一般情况下你使用的应该是支持事务的数据库而且大部分测试都继承`TestCase`，因此不需要这个设置。
+
+初始序列化通常很快，但是如果你希望序列化时排除掉某些应用，或者希望稍微加快点测试执行速度，你可能需要添加那些你想排除掉的应用到[**`TEST_NON_SERIALIZED_APPS`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-TEST_NON_SERIALIZED_APPS)。
+
+为了防止序列化后的数据被重复加载，定义`serialized_rollback=True`
+
+----------------------------
+
+###其他测试情况
+
+无论你的`settings`配置文件中[**`DEBUG`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DEBUG)变量的值是什么，所有`Django`的测试都按[**`DEBUG`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DEBUG)=`False`来执行。这是为了确保你的代码的输出能够和生产环境配置下的输出相匹配。
+
+每个测试执行结束后高速缓存不会被清空，如果你在生产环境下执行`manage.py test fooapp`，可以把数据从测试代码中插入到正在跑的系统的高速缓存中，这一点和数据库不同，不会有单独的一个“测试用高速缓存”被创建。但是这个有可能在将来有所[**改变**](https://code.djangoproject.com/ticket/11505)。

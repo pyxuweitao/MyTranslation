@@ -177,11 +177,11 @@ $ ./manage.py test --pattern="tests_*.py"
 
 ###仿真回滚
 
-任何初始数据，而且只可以在支持事务的数据库（最重要的例外：`MyISAM`）
+任何在`migrations`中加载的初始数据只有基于`TestCase`的测试可以获取，基于`TransactionTestCase`则不能获取，而且只可以在支持事务的后端（`MyISAM`不支持事务处理）。对于那些继承了`TransactionTestCase`的测试类比如[` LiveServerTestCase`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.LiveServerTestCase)和[`StaticLiveServerTestCase`](https://docs.djangoproject.com/en/1.9/ref/contrib/staticfiles/#django.contrib.staticfiles.testing.StaticLiveServerTestCase)同样也适用于这条规则。
 
 通过在`TestCase`或者`TransactionTestCase`的子类定义体中设置`serialized_rollback`选项为`True`，`Django`就可以为一个测试用例执重新从数据库载入数据，但是请注意这将减慢测试套件三倍左右的运行速度。
 
-第三方应用或者那些倚靠`MyISM`的开发将会需要设置上边提到的。但是一般情况下你使用的应该是支持事务的数据库而且大部分测试都继承`TestCase`，因此不需要这个设置。
+第三方应用或者那些依赖于`MyISAM`的开发将会需要设置上边提到的。但是一般情况下你使用的应该是支持事务的数据库而且大部分测试都继承`TestCase`，因此不需要这个设置。
 
 初始序列化通常很快，但是如果你希望序列化时排除掉某些应用，或者希望稍微加快点测试执行速度，你可能需要添加那些你想排除掉的应用到[**`TEST_NON_SERIALIZED_APPS`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-TEST_NON_SERIALIZED_APPS)。
 
@@ -194,3 +194,62 @@ $ ./manage.py test --pattern="tests_*.py"
 无论你的`settings`配置文件中[**`DEBUG`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DEBUG)变量的值是什么，所有`Django`的测试都按[**`DEBUG`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-DEBUG)=`False`来执行。这是为了确保你的代码的输出能够和生产环境配置下的输出相匹配。
 
 每个测试执行结束后高速缓存不会被清空，如果你在生产环境下执行`manage.py test fooapp`，可以把数据从测试代码中插入到正在跑的系统的高速缓存中，这一点和数据库不同，不会有单独的一个“测试用高速缓存”被创建。但是这个有可能在将来有所[**改变**](https://code.djangoproject.com/ticket/11505)。
+
+---------------------------
+
+###读懂测试输出
+
+当你执行你的测试时，你将看到大量的测试执行的准备信息。你可以通过命令选项`verbosity`去控制这些信息详细程度：
+
+```django
+Creating test database...
+Creating table myapp_animal
+Creating table myapp_mineral
+```
+
+上边是在告诉你测试当前正在创建一个测试用的数据库，就像上边的章节讲的那样。
+
+一旦测试用数据库创建完毕，`Django`将开始执行你的测试。如果所有的测试执行正常且全部通过，你将看到像这样的输出：
+
+```django
+----------------------------------------------------------------------
+Ran 22 tests in 0.221s
+
+OK
+```
+
+如果存在一些测试失败，你将看到有关失败的测试的全部的细节信息：
+
+```django
+======================================================================
+FAIL: test_was_published_recently_with_future_poll (polls.tests.PollMethodTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/mysite/polls/tests.py", line 16, in test_was_published_recently_with_future_poll
+    self.assertEqual(future_poll.was_published_recently(), False)
+AssertionError: True != False
+
+----------------------------------------------------------------------
+Ran 1 test in 0.003s
+
+FAILED (failures=1)
+```
+
+有关这些错误输出的详细的说明已经超过这篇文档的范围，但是输出的信息其实很直观。你可以通过查阅`Python`的[**unittest**](https://docs.python.org/3/library/unittest.html#module-unittest)库的文档来获取更多详细信息。
+
+另外请注意，如果测试中出现失败的测试或者报错，测试脚本的返回代码是1。如果测试全部通过，返回代码是0。如果你在一个`shell`脚本中使用测试脚本，并且你需要在`shell`脚本中获取测试成功与否的信息，这个特性就非常有用了。
+
+
+-------------------
+
+###加速测试
+
+在较新的`Django`版本中，默认的密码哈希执行被设计的相当缓慢。如果在你的测试中需要认证很多用户，你可以使用一个定制的`settings`文件，然后将[**PASSWORD_HASHERS**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-PASSWORD_HASHERS)配置上一个更快的哈希算法:
+
+```python
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+]
+```
+
+最后，不要忘记添加`fixtures`中用到的相应的哈希算法到[**PASSWORD_HASHERS**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-PASSWORD_HASHERS)中，如果你用到`fixtures`的话。

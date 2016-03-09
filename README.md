@@ -9,5 +9,5 @@
 |中文译名|原标题和链接|翻译周期|翻译人|说明|
 |:-----:|:-----:|:-----:|:----:|:-------:|
 |在Django项目中进行测试|[Testing in Django](https://docs.djangoproject.com/en/1.9/topics/testing/)|2016-03-01~2016-03-01|徐维涛|`Django1.9`官方文档翻译|
-|Django中编写和执行测试|[Writing and running tests](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)|2016-03-02~2016-03-05|徐维涛|`Django1.9`官方文档翻译|
+|Django中编写和执行测试|[Writing and running tests](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)|2016-03-02~2016-03-09|徐维涛|`Django1.9`官方文档翻译|
 

@@ -98,7 +98,33 @@ b'<!DOCTYPE html...'
 
 一旦你实例化了`Client`，你就可以调用以下的方法：
 
-`get(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.get)
+- `get(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.get)
+ 
+ 发起一个指定**path**的请求，然后返回一个**Response**对象。响应对象在下方会有详细文档。
+ 
+ **data**参数传递的键值对可以被用来创建一个有数据的`GET`请求。比如：
+ 
+```python
+>>> c = Client()
+>>> c.get('/customers/details/', {'name': 'fred', 'age': 7})
+```
 
+这样发起的`GET`请求就等价于
 
+```javascript
+/customers/details/?name=fred&age=7
+```
 
+**extra**参数可以被用于指定请求头的信息。比如：
+
+```python
+>>> c = Client()
+>>> c.get('/customers/details/', {'name': 'fred', 'age': 7},
+...       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+```
+
+这样将发送一个带有`HTTP_X_REQUESTED_WITH`请求头的请求，这对于使用`django.http.HttpRequest.is_ajax()`方法的测试来说有好处。
+
+>**CGI标准**
+
+>通过****extra**传递的报文头参数应该遵循[`CGI`](https://www.w3.org/CGI/)的标准。例如，模拟一个从浏览器发送到服务器，但是`Host`报文头不同的`HTTP`请求，应该传递的参数的名称是`HTTP_HOST`。

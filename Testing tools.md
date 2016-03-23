@@ -3,7 +3,7 @@
 ------------------------------
 
 - 翻译人：徐维涛
-- 翻译周期：2016-03-10~2016-03-09
+- 翻译周期：2016-03-20~2016-03-21
 - 中文译名：Django中的测试工具
 - 原标题和链接：[Testing tools](https://docs.djangoproject.com/en/1.9/topics/testing/tools/)
 - 说明：`Django1.9`官方文档翻译，为保证翻译后语义通顺便于理解，在不影响把握原文所表中心的前提下，部分原文语句有省略、补充。翻译本文纯属兴趣爱好，不敢保证与原文所表100%一致，但必字句斟酌。能力有限，如有异译或觉不妥，欢迎交流。误导必致歉，查错必纠正。
@@ -54,15 +54,15 @@ b'<!DOCTYPE html...'
 
 - 当请求网页的时候，只需要指出网页的相对`URL`路径而不需要整个域名。例如，这样是正确的：
 
- ```python
- >>> c.get('/login/')
- ```
+```python
+>>> c.get('/login/')
+```
 
  不正确的：
 
- ```python
- >>> c.get('https://www.example.com/login/')
- ```
+```python
+>>> c.get('https://www.example.com/login/')
+```
 
  测试客户端不能直接访问你的`Django`项目之外的网页。如果你需要访问项目之外的网页，使用`Python`标准库，比如[`urllib`](https://docs.python.org/3/library/urllib.html#module-urllib)。
 
@@ -75,10 +75,12 @@ b'<!DOCTYPE html...'
   
   如果你想要你的测试客户端去执行`CSRF`检查，你可以在实例化测试客户端的时候传递`enforce_csrf_checks`参数：
   
-  ```python
- >>> from django.test import Client
- >>> csrf_client = Client(enforce_csrf_checks=True)
- ```
+```python
+>>> from django.test import Client
+>>> csrf_client = Client(enforce_csrf_checks=True)
+```   
+
+
 
 -----------------------------------------------
 
@@ -94,11 +96,11 @@ b'<!DOCTYPE html...'
 >>> c = Client(HTTP_USER_AGENT='Mozilla/5.0')
 ```
 
-有一些在`Client`的[`get()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.get)或者[`post()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.post)方法中传递的参数优先于在实例化`Client`时传递的参数。`enforce_csrf_checks`参数可以被用于测试`CSRF`保护（见上）。
+有一些在`Client`的[`get()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.get)或者[`post()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.post)方法中传递的参数优先于(会覆盖掉)在实例化`Client`时传递的相同概念的参数。`enforce_csrf_checks`参数可以被用于测试`CSRF`保护（见上）。
 
 一旦你实例化了`Client`，你就可以调用以下的方法：
 
-- `get(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.get)
+###`get(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.get)
  
  发起一个指定**path**的请求，然后返回一个**Response**对象。响应对象在下方会有详细文档。
  
@@ -111,7 +113,7 @@ b'<!DOCTYPE html...'
 
 这样发起的`GET`请求就等价于
 
-```javascript
+```plain
 /customers/details/?name=fred&age=7
 ```
 
@@ -128,3 +130,54 @@ b'<!DOCTYPE html...'
 >**CGI标准**
 
 >通过****extra**传递的报文头参数应该遵循[`CGI`](https://www.w3.org/CGI/)的标准。例如，模拟一个从浏览器发送到服务器，但是`Host`报文头不同的`HTTP`请求，应该传递的参数的名称是`HTTP_HOST`。
+
+如果你已经把`GET`参数写到了`URL`里，那你就不需要再传入一遍这些参数了。例如，上边的`GET`请求也可以写成：
+
+```python
+>>> c = Client()
+>>> c.get('/customers/details/?name=fred&age=7')
+```
+
+如果你把参数写到了`URL`里，同时也在`get`方法中传入了参数，那么传入的参数将覆盖掉`URL`中的参数。
+
+如果你将**follow**设置为**True**，测试客户端将追踪重定向，返回的响应对象的**redirect_chain**属性是一个元组，包含所有中间`URL`以及对应的状态码。
+
+比如，如果你发起请求访问**/redirect_me/**，这个链接重定向到**/next/**，再重定向到**/final/**，这个时候你就会看到：
+
+```python
+>>> response = c.get('/redirect_me/', follow=True)
+>>> response.redirect_chain
+[('http://testserver/next/', 302), ('http://testserver/final/', 302)]
+```
+
+如果你将**secure**设置为**True**，测试客户端会模拟**HTTPS**的请求。
+
+
+###`post(path, data=None, content_type=MULTIPART_CONTENT, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.post)
+
+发起一个指定**path**的`POST`请求，返回一个**Response**对象，有关该对象下边会详细说明。
+
+参数**data**是`POST`请求提交的数据，一般为键值对。例如：
+
+
+```python
+>>> c = Client()
+>>> c.post('/login/', {'name': 'fred', 'passwd': 'secret'})
+```
+
+这样发起的`POST`请求就等价于
+
+```plain
+/login/
+```
+
+其中包含的`POST`数据为：
+
+```plian
+name=fred&passwd=secret
+```
+
+如果你在调用`post`方法时指定了**content_type**参数（比如`XML`对应的`text/xml`），那么你的发出去的`POST`请求报文就包含了数据和你指定的**content_type**请求头。
+
+如果你没有指定**content_type**参数，那么**content_type**将默认为`multipart/form-data`。在上边的例子里，**data**中的数据将被按照`multipart/form`的格式编码。
+

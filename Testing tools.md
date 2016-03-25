@@ -30,7 +30,7 @@
 
 一个全面的测试套件应当综合使用这两种测试类型。
 
-##概述和一个简单的小例子
+###概述和一个简单的小例子
 
 如果要使用测试客户端，实例化`django.test.Client`来获取网页：
 
@@ -84,7 +84,7 @@ b'<!DOCTYPE html...'
 
 -----------------------------------------------
 
-##发起请求
+###发起请求
 
 使用`django.test.Client`类来发起请求。
 
@@ -100,7 +100,7 @@ b'<!DOCTYPE html...'
 
 一旦你实例化了`Client`，你就可以调用以下的方法：
 
-###`get(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.get)
+####`get(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.get)
  
  发起一个指定**path**的请求，然后返回一个**Response**对象。响应对象在下方会有详细文档。
  
@@ -153,7 +153,7 @@ b'<!DOCTYPE html...'
 如果你将**secure**设置为**True**，测试客户端会模拟**HTTPS**的请求。
 
 
-###`post(path, data=None, content_type=MULTIPART_CONTENT, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.post)
+####`post(path, data=None, content_type=MULTIPART_CONTENT, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.post)
 
 发起一个指定**path**的`POST`请求，返回一个**Response**对象，有关该对象下边会详细说明。
 
@@ -180,4 +180,22 @@ name=fred&passwd=secret
 如果你在调用`post`方法时指定了**content_type**参数（比如`XML`对应的`text/xml`），那么你的发出去的`POST`请求报文就包含了数据和你指定的**content_type**请求头。
 
 如果你没有指定**content_type**参数，那么**content_type**将默认为`multipart/form-data`。在上边的例子里，**data**中的数据将被按照`multipart/form`的格式编码。
+
+有时需要提交一个单键多值的字典——比如指定**<select multiple>**的选项时，一个键会有多个值与之对应。举个栗子，**choice**键有三个值组成一个元组作为选项：
+
+```python
+{'choices': ('a', 'b', 'd')}
+```
+
+提交文件是一种特殊的情况。需要**POST**一个文件时，你只需要用一个文件字段名作为键和一个指向你想上传的文件的指针作为对应的值。例如：
+
+```python
+>>> c = Client()
+>>> with open('wishlist.doc') as fp:
+...     c.post('/customers/wishes/', {'name': 'fred', 'attachment': fp})
+```
+
+（注意这里的键名**attachment**不是固定的，任意键名都是可以的。）
+
+你可能
 

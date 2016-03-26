@@ -197,5 +197,23 @@ name=fred&passwd=secret
 
 （注意这里的键名**attachment**不是固定的，任意键名都是可以的。）
 
-你可能
+与`get()`方法类似，你同样也可以通过提供一个文件指针来上传类文件对象（比如[**StringIO**](https://docs.python.org/3/library/io.html#io.StringIO)）或者[**BytesIO**](https://docs.python.org/3/library/io.html#io.BytesIO)。
+
+>**Django 1.8 新特性**
+>使用类文件对象的功能已经添加。
+
+
+注意，假如你打算在多个`post()`方法中使用同一个文件指针，需要手动的在每次**post**之前手动重置这个文件指针。最简单的办法就是用上边代码展示的那样，在每次把文件指针传给`post()`之后，手动关闭掉这个文件流。
+
+
+你应当确保你的文件以一种能够被正常读出的方式打开。比如文件是一张图片，其中包含了二进制数据，这意味着你需要以**`rb`**(`read binary`)方式打开这个文件。
+
+
+其他参数的指定方法都类似[**`Client.get()`**](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.get)。
+
+如果你发起一个`URL`的**POST**请求，其中包含一些已经编码好的参数，这些参数将能够在`request.GET`字典中获取到。举个栗子，如果你发起了这样一个请求：
+
+```python
+>>> c.post('/login/?visitor=true', {'name': 'fred', 'passwd': 'secret'})
+```
 

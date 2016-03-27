@@ -217,3 +217,20 @@ name=fred&passwd=secret
 >>> c.post('/login/?visitor=true', {'name': 'fred', 'passwd': 'secret'})
 ```
 
+视图处理请求的时候能够根据`request.POST`获取用户名和密码，也能根据`request.GET`来确定当前用户是否是一个`visitor`。
+
+和`get()`方法一样，如果你将**follow**设置为**True**，测试客户端将追踪重定向，返回的响应对象的**redirect_chain**属性是一个元组，包含所有中间`URL`以及对应的状态码。
+
+如果你将**secure**设置为**True**，测试客户端会模拟**HTTPS**的请求。
+
+####`head(path, data=None, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.head)
+
+发起对**path**访问的`HEAD`请求然后返回一个**Response**对象。这个函数调用方法和[`Client.get()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.get)基本上一致，也包含了**follow**,**secure**,**extra**等参数，但是`HEAD`请求并不会给你返回一个消息体。
+
+####`options(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.options)
+
+发起对**path**访问的`OPTIONS`请求然后返回一个**Response**对象。在**RESTful**接口中很常见的请求。
+
+**data**参数的值会作为请求体发送，请求头中的**Content-Type**由参数**content_type**决定。
+
+**follow**,**secure**,**extra**等参数的作用方式与**`Client.get()`**相同。

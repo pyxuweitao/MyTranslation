@@ -229,8 +229,64 @@ name=fred&passwd=secret
 
 ####`options(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.options)
 
-发起对**path**访问的`OPTIONS`请求然后返回一个**Response**对象。在**RESTful**接口中很常见的请求。
+发起对**path**访问的`OPTIONS`请求然后返回一个**Response**对象。在**RESTful**接口中很常见的请求类型。
 
 **data**参数的值会作为请求体发送，请求头中的**Content-Type**由参数**content_type**决定。
 
 **follow**,**secure**,**extra**等参数的作用方式与**`Client.get()`**相同。
+
+####`put(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.put)
+
+发起对**path**访问的`PUT`请求然后返回一个**Response**对象。在**RESTful**接口中很常见的请求类型。
+
+**data**参数的值会作为请求体发送，请求头中的**Content-Type**由参数**content_type**决定。
+
+**follow**,**secure**,**extra**等参数的作用方式与**`Client.get()`**相同。
+
+####`patch(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.patch)
+
+发起对**path**访问的`PATCH`请求然后返回一个**Response**对象。在**RESTful**接口中很常见的请求类型。
+
+**follow**,**secure**,**extra**等参数的作用方式与**`Client.get()`**相同。
+
+####`delete(path, data='', content_type='application/octet-stream', follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.delete)
+
+发起对**path**访问的`DELETE`请求然后返回一个**Response**对象。在**RESTful**接口中很常见的请求类型。
+
+**data**参数的值会作为请求体发送，请求头中的**Content-Type**由参数**content_type**决定。
+
+**follow**,**secure**,**extra**等参数的作用方式与**`Client.get()`**相同。
+
+####`trace(path, follow=False, secure=False, **extra)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.trace)
+
+>**Django 1.8的新特性**
+
+发起对**path**访问的`TRACE`请求然后返回一个**Response**对象。这个请求通常应用于模拟诊断探测。
+
+区别于其他的请求类型，根据[`RFC 2616`](https://tools.ietf.org/html/rfc2616.html)的约定，**TRACE**请求不应该包含实体，因此`trace()`方法并不提供**data**参数。
+
+**follow**,**secure**,**extra**等参数的作用方式与**`Client.get()`**相同。
+
+####`login(**credentials)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.login)
+
+如果你的网站使用了`Django`的[认证系统](https://docs.djangoproject.com/en/1.9/topics/auth/)来处理用户登录，你可以使用测试客户端的**`login()`**方法去模拟用户登录的效果。
+
+由于这个方法和使用了[**`AuthenticationForm`**](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.forms.AuthenticationForm)的[**`login()`**](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.login)视图是等效的，因此不活跃的用户（[`is_active=False`](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.User.is_active)）默认是没有权限登录的。
+
+在你调用了这个方法成功登录之后，测试客户端将利用必需的`cookies`和`session`的数据去通过那些基于用户登录信息的测试。
+
+**credentials**参数的形式取决于你在配置文件中[**`AUTHENTICATION_BACKENDS`**](https://docs.djangoproject.com/en/1.9/ref/settings/#std:setting-AUTHENTICATION_BACKENDS)配置好的[认证后端](https://docs.djangoproject.com/en/1.9/topics/auth/customizing/#authentication-backends)。如果你正在使用`Django`标准的认证后端（**ModelBackend**），**credentials**应当由用户的用户名和密码关键字组成。
+
+```python
+>>> c = Client()
+>>> c.login(username='fred', password='secret')
+
+# 现在你就可以访问已登录用户才能访问到的视图.
+```
+
+如果你正在使用其他的认证后端，这个方法可能需要不同的**credentials**。它需要的参数和你使用的后端的`authenticate()`方法是一致的。
+
+如果`credentials`参数被接收而且认证通过，`login()`返回`True`。
+
+最后，
+

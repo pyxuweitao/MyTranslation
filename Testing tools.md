@@ -271,7 +271,7 @@ name=fred&passwd=secret
 
 如果你的网站使用了`Django`的[认证系统](https://docs.djangoproject.com/en/1.9/topics/auth/)来处理用户登录，你可以使用测试客户端的**`login()`**方法去模拟用户登录的效果。
 
-由于这个方法和使用了[**`AuthenticationForm`**](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.forms.AuthenticationForm)的[**`login()`**](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.login)视图是等效的，因此不活跃的用户（[`is_active=False`](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.User.is_active)）默认是没有权限登录的。
+由于这个方法和使用了[**`AuthenticationForm`**](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.forms.AuthenticationForm)的[**`login()`**](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.login)视图是等效的，因此没被激活的用户（[`is_active=False`](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.User.is_active)）默认是没有权限登录的。
 
 在你调用了这个方法成功登录之后，测试客户端将利用必需的`cookies`和`session`的数据去通过那些基于用户登录信息的测试。
 
@@ -288,5 +288,88 @@ name=fred&passwd=secret
 
 如果`credentials`参数被接收而且认证通过，`login()`返回`True`。
 
-最后，
+最后要提醒的是，你要确保在你调用这个方法之前已经创建了对应的用户。正如之前介绍的，测试程序执行的时候使用的是默认没有用户数据的测试用数据库。因此，生产站点上合法的用户在测试的时候是无法使用的。你需要在测试套件中先创建新用户——手动使用`Django`的`model`的`API`或者使用其他的测试工具。另外注意一点，如果你像让你的测试用户拥有一个密码，你不能通过密码属性值来设置用户密码，而是应该使用[`set_password()`](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.User.set_password)方法去存储一个哈希加密过的正确过的密码。当然你也可以使用[`create_user`](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.UserManager.create_user)方法去创建一个新用户。
 
+
+####`force_login(user, backend=None)`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.force_login)
+
+>**Django 1.9 新特性**
+
+如果你的站点正在使用`Django`的[认证系统](https://docs.djangoproject.com/en/1.9/topics/auth/)，你可以使用`force_login()`方法去模拟用户登录的效果。当用户登录的详细信息不重要时，可以考虑使用**`force_login()`**而不是 [ `login()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.login)。
+
+不同于`login()`的是，`force_login()`方法跳过了认证的过程：没被激活的用户([`is_active=False`](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.User.is_active))也允许登录，而且用户的认证信息(`credentials`参数)也不需要提供。
+
+用户将拥有**backend**属性，由传入的参数`backend`决定（应当是一个`Python`的点路径字符串），或者当这个参数没有被传入时，由**settings.AUTHENTICATION_BACKENDS[0]**决定。由 [ `login()`](https://docs.djangoproject.com/en/1.9/topics/testing/tools/#django.test.Client.login)调用的[`authenticate()`](https://docs.djangoproject.com/en/1.9/topics/auth/default/#django.contrib.auth.authenticate)函数通常通过这个来标识用户。
+
+####`logout()`[[source]](https://docs.djangoproject.com/en/1.9/_modules/django/test/client/#Client.logout)
+
+如果你的站点正在使用`Django`的[认证系统](https://docs.djangoproject.com/en/1.9/topics/auth/)，你可以使用`logout()`方法去模拟用户注销的效果。
+
+在你调用了这个方法之后，测试客户端会将所有的`cookies`和`session`数据还原到默认状态。随后的请求将来自一个[匿名用户](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.AnonymousUser)。
+
+###测试响应
+
+`get()`和`post()`方法都会返回**Response**对象。这个**Response**对象和`Django`视图所需要返回的**HttpResponse**不一样，测试所返回的**Response**对象多了一些对测试代码实现的功能很有用处的数据。
+
+一个**Response**对象含有的属性包括：
+
+####`class Response`
+
+#####**client**
+
+用于发起请求并产生这个响应对象的测试客户端。
+
+#####**content**
+
+响应的实体，是一个字节串。要么是视图渲染之后形成的最终的页面内容，要么是一些错误信息。
+
+#####**context**
+
+模板的上下文实例，用来渲染模板最终形成响应对象的**content**属性。
+
+如果被渲染的网页使用了多个模板，那么**context**属性将会是一个按照渲染顺序排序的**Context**对象列表。
+
+不论在渲染的过程中使用了多少个模板，你可以使用操作符`[]`来检索上下文的值。举个栗子，上下文变量**name**可以通过下边的方法检索：
+  
+```python
+>>> response = client.get('/foo/')
+>>> response.context['name']
+'Arthur'
+```
+
+>**没在使用`Django`原生的模板？**
+
+>**context**这个属性只有在使用[`DjangoTemplates`](https://docs.djangoproject.com/en/1.9/topics/templates/#django.template.backends.django.DjangoTemplates)时是有效的，当你使用其他模板引擎时，对应属性名是[**context_data**](https://docs.djangoproject.com/en/1.9/ref/template-response/#django.template.response.SimpleTemplateResponse.context_data)而不是**context**。
+
+#####`json(**kwargs)`
+
+>**Django 1.9 新特性**
+ 
+将响应体按照`JSON`格式解析，该方法调用时的其他参数可以参考[`json.loads()`](https://docs.python.org/3/library/json.html#json.loads)方法，两者是一样的。但是请注意，如果响应头中**Content-Type**并不是**"application/json"**，那么在尝试调用这个方法时会抛出[**ValueError**](https://docs.python.org/3/library/exceptions.html#ValueError)异常。最后，举个调用的例子：
+ 
+```python
+>>> response = client.get('/foo/')
+>>> response.json()['name']
+'Arthur'
+```
+
+
+#####**request**
+
+响应对应的请求数据。
+
+#####**wsgi_request**
+
+由生成响应的测试处理器生成的**WSGIRequest**实例。
+
+#####**status_code**
+
+响应的**HTTP状态**，值为一个整数。查看[**RFC 2616 第十章节**](https://tools.ietf.org/html/rfc2616.html#section-10)来获取**HTTP**状态码详细列表。
+
+#####**templates**
+
+由用来渲染最终**content**属性内容的模板实例组成的列表，列表中实例的顺序即模板渲染顺序。对于列表中的每一个模板，如果是从文件中加载，可以使用`template.name`去获取模板文件的名称（名称是一个字符串，比如`'admin/index.html'`）。
+
+>**没在使用`Django`原生的模板？**
+
+>**templates.name**这个属性只有在使用[`DjangoTemplates`](https://docs.djangoproject.com/en/1.9/topics/templates/#django.template.backends.django.DjangoTemplates)时是有效的，当你使用其他模板引擎时，如果你只需要模板的名称，可以直接用[**template_name**](https://docs.djangoproject.com/en/1.9/ref/template-response/#django.template.response.SimpleTemplateResponse.template_name)。

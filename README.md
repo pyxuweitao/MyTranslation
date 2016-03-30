@@ -10,5 +10,5 @@
 |:-----:|:-----:|:-----:|:----:|:-------:|
 |[在Django项目中进行测试](http://xuweitao.me/zai-djangoxiang-mu-zhong-jin-xing-ce-shi.html)|[Testing in Django](https://docs.djangoproject.com/en/1.9/topics/testing/)|2016-03-01~2016-03-01|徐维涛|`Django1.9`官方文档翻译|
 |[Django中编写和执行测试](http://xuweitao.me/djangozhong-bian-xie-he-zhi-xing-ce-shi.html)|[Writing and running tests](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)|2016-03-02~2016-03-09|徐维涛|`Django1.9`官方文档翻译|
-|[Django中的测试工具](http://xuweitao.me/djangozhong-bian-xie-he-zhi-xing-ce-shi.html)|[Testing tools](https://docs.djangoproject.com/en/1.9/topics/testing/tools/)|2016-03-20~2016-03-21|徐维涛|`Django1.9`官方文档翻译|
+|[Django中的测试工具 之 测试客户端](http://xuweitao.me/djangoce-shi-gong-ju-zhi-ce-shi-ke-hu-duan.html)|[Testing tools](https://docs.djangoproject.com/en/1.9/topics/testing/tools/)|2016-03-20~2016-03-30|徐维涛|`Django1.9`官方文档翻译|
 

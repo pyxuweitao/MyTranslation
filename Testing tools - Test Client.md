@@ -3,8 +3,8 @@
 ------------------------------
 
 - 翻译人：徐维涛
-- 翻译周期：2016-03-20~2016-03-21
-- 中文译名：Django中的测试工具
+- 翻译周期：2016-03-20~2016-03-30
+- 中文译名：Django中的测试工具 之 测试客户端
 - 原标题和链接：[Testing tools](https://docs.djangoproject.com/en/1.9/topics/testing/tools/)
 - 说明：`Django1.9`官方文档翻译，为保证翻译后语义通顺便于理解，在不影响把握原文所表中心的前提下，部分原文语句有省略、补充。翻译本文纯属兴趣爱好，不敢保证与原文所表100%一致，但必字句斟酌。能力有限，如有异译或觉不妥，欢迎交流。误导必致歉，查错必纠正。
 - 版权声明：未经本人许可，禁止转载发布
@@ -181,7 +181,7 @@ name=fred&passwd=secret
 
 如果你没有指定**content_type**参数，那么**content_type**将默认为`multipart/form-data`。在上边的例子里，**data**中的数据将被按照`multipart/form`的格式编码。
 
-有时需要提交一个单键多值的字典——比如指定**<select multiple>**的选项时，一个键会有多个值与之对应。举个栗子，**choice**键有三个值组成一个元组作为选项：
+有时需要提交一个单键多值的字典——比如指定`<select multiple>`的选项时，一个键会有多个值与之对应。举个栗子，**choice**键有三个值组成一个元组作为选项：
 
 ```python
 {'choices': ('a', 'b', 'd')}
@@ -200,6 +200,7 @@ name=fred&passwd=secret
 与`get()`方法类似，你同样也可以通过提供一个文件指针来上传类文件对象（比如[**StringIO**](https://docs.python.org/3/library/io.html#io.StringIO)）或者[**BytesIO**](https://docs.python.org/3/library/io.html#io.BytesIO)。
 
 >**Django 1.8 新特性**
+
 >使用类文件对象的功能已经添加。
 
 
@@ -307,6 +308,8 @@ name=fred&passwd=secret
 
 在你调用了这个方法之后，测试客户端会将所有的`cookies`和`session`数据还原到默认状态。随后的请求将来自一个[匿名用户](https://docs.djangoproject.com/en/1.9/ref/contrib/auth/#django.contrib.auth.models.AnonymousUser)。
 
+-----------------
+
 ###测试响应
 
 `get()`和`post()`方法都会返回**Response**对象。这个**Response**对象和`Django`视图所需要返回的**HttpResponse**不一样，测试所返回的**Response**对象多了一些对测试代码实现的功能很有用处的数据。
@@ -373,3 +376,88 @@ name=fred&passwd=secret
 >**没在使用`Django`原生的模板？**
 
 >**templates.name**这个属性只有在使用[`DjangoTemplates`](https://docs.djangoproject.com/en/1.9/topics/templates/#django.template.backends.django.DjangoTemplates)时是有效的，当你使用其他模板引擎时，如果你只需要模板的名称，可以直接用[**template_name**](https://docs.djangoproject.com/en/1.9/ref/template-response/#django.template.response.SimpleTemplateResponse.template_name)。
+
+#####**resolver_match**
+
+>**Django 1.8 新特性**
+
+>响应对象的一个[**ResolverMatch**](https://docs.djangoproject.com/en/1.9/ref/urlresolvers/#django.core.urlresolvers.ResolverMatch)实例。你可以使用这个实例的[**func**](https://docs.djangoproject.com/en/1.9/ref/urlresolvers/#django.core.urlresolvers.ResolverMatch.func)属性去回溯这个响应对应的视图。例如：
+
+```python
+# 这里的 my_view 是一个视图函数
+self.assertEqual(response.resolver_match.func, my_view)
+# 基于类的视图判定相同需要比较函数名称(__name__)
+# 直接拿as_view() 生成的函数和func比较不会相等。
+self.assertEqual(response.resolver_match.func.__name__, MyView.as_view().__name__)
+```
+
+>如果对应的`URL`不存在，直接获取这个属性的值的话将抛出[**Resolver404**](https://docs.djangoproject.com/en/1.9/ref/exceptions/#django.core.urlresolvers.Resolver404)异常。
+
+
+你也可以使用字典的相关语法去获取或者设置**HTTP**响应头中的相关信息的值。比如你可以通过使用**`response['Content-Type']`**去决定响应内容的类型。
+
+--------------------
+
+###异常
+
+测试客户端访问某个视图时抛出异常，这些异常都是可以捕获到的。你可以使用标准的`try...except`代码块或者[`assertRaises()`](https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertRaises)去测试异常。
+
+但是不是所有的异常都是可以捕获的，像[`Http404`](https://docs.djangoproject.com/en/1.9/topics/http/views/#django.http.Http404)、[`PermissionDenied`](https://docs.djangoproject.com/en/1.9/ref/exceptions/#django.core.exceptions.PermissionDenied)、[`SystemExit`](https://docs.python.org/3/library/exceptions.html#SystemExit)和[`SuspiciousOperation`](https://docs.djangoproject.com/en/1.9/ref/exceptions/#django.core.exceptions.SuspiciousOperation)都是无法捕获的。`Django`在内部捕获这些异常并直接将其转换为对应的**HTTP**状态码返回。你可以在测试里通过检查`response.status_code`来判断异常。
+
+-----------------------
+
+###持久化状态
+
+测试客户端是有状态的。如果一个响应返回了`cookies`，那么`cookies`将被存储到测试客户端然后在之后的`get()`或`post()`请求中发送出去。
+
+这些`cookies`并不遵循超时策略。如果你想让一个`cookie`超时，要么手动删除它，要么创建一个新的**Client**实例（迅速删掉了所有的`cookies`）。
+
+一个测试客户端有两个用来保存持久化状态信息的属性。你可以在测试时访问这些属性的内容。
+
+####`Client.cookies`
+
+一个`Python`的[`SimpleCookie`](https://docs.python.org/3/library/http.cookies.html#http.cookies.SimpleCookie)对象，包含了测试客户端中所有当前`cookies`的值。查看[`http.cookies`](https://docs.python.org/3/library/http.cookies.html#module-http.cookies)模块的文档获取更多详细信息。
+
+####`Client.session`
+
+一个包含会话信息的类似字典的对象。查看[会话文档](https://docs.djangoproject.com/en/1.9/topics/http/sessions/)获取详细信息。
+
+如果你想要修改会话信息并且保存，必须首先把`Client.session`保存在一个变量里（因为每一次访问这个属性的时候都会有一个新的**SessionStore**被创建）。
+
+```python
+def test_something(self):
+    session = self.client.session
+    session['somekey'] = 'test'
+    session.save()
+```
+
+--------------------
+
+###例子
+
+下边是一个使用测试客户端的简单的单元测试：
+
+```python
+import unittest
+from django.test import Client
+
+class SimpleTest(unittest.TestCase):
+    def setUp(self):
+        # Every test needs a client.
+        self.client = Client()
+
+    def test_details(self):
+        # Issue a GET request.
+        response = self.client.get('/customer/details/')
+
+        # Check that the response is 200 OK.
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the rendered context contains 5 customers.
+        self.assertEqual(len(response.context['customers']), 5)
+```
+
+>也可以看看
+
+>[`django.test.RequestFactory`](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#django.test.RequestFactory)
+

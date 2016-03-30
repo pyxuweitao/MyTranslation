@@ -6,7 +6,7 @@
 - 翻译周期：2016-03-01~2016-03-01
 - 中文译名：在Django项目中进行测试
 - 原标题和链接：[Testing in Django](https://docs.djangoproject.com/en/1.9/topics/testing/)
-- 说明：`Django1.9`官方文档翻译，为保证翻译后语义通顺便于理解，在不影响把握原文所表中心的前提下，部分原文语句有省略、补充。翻译本文纯属兴趣爱好，不敢保证与原文所表100%一致，但必字句斟酌。能力有限，如有异译或觉不妥，欢迎交流。误导必致歉，查错必纠正。
+- 说明：`Django1.9`官方文档翻译
 - 版权声明：未经本人许可，禁止转载发布
 
 -------------------------------
@@ -20,14 +20,15 @@
 
 最棒的地方是，在`Django`中进行测试真的很简单。
 
-在`Django`中编写测试，我们推荐使用`Python`标准库中内建的 [**unittest**](https://docs.python.org/3/library/unittest.html#module-unittest) 模块。如何使用它在 **[Writing and running tests](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)** 文档中有详细说明。
+在`Django`中编写测试，我们推荐使用`Python`标准库中内建的 [**unittest**](https://docs.python.org/3/library/unittest.html#module-unittest) 模块。如何使用它在 **[Django中编写和执行测试](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)** 文档中有详细说明。
 
-你也可以使用任何其他的`Python`测试框架，`Django`提供了一个`API`和一些工具来帮助你把其他测试框架集成到`Django`中。具体做法可以参考文档**[Advanced testing topics](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)**中的**[Using different testing frameworks](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#other-testing-frameworks)**章节。
+你也可以使用任何其他的`Python`测试框架，`Django`提供了一个`API`和一些工具来帮助你把其他测试框架集成到`Django`中。具体做法可以参考文档**[Advanced testing topics](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)**中的**[使用其他测试框架](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#other-testing-frameworks)**章节。
 
 ----------------
 
 目录章节：
 
-- [Writing and running tests](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)
-- [Testing tools](https://docs.djangoproject.com/en/1.9/topics/testing/tools/)
+- [Django中编写和执行测试](http://xuweitao.me/djangozhong-bian-xie-he-zhi-xing-ce-shi.html)
+- [测试工具 - 测试客户端](http://xuweitao.me/djangoce-shi-gong-ju-zhi-ce-shi-ke-hu-duan.html)
 - [Advanced testing topics](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)
+

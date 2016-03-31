@@ -22,7 +22,7 @@
 
 在`Django`中编写测试，我们推荐使用`Python`标准库中内建的 [**unittest**](https://docs.python.org/3/library/unittest.html#module-unittest) 模块。如何使用它在 **[Django中编写和执行测试](https://docs.djangoproject.com/en/1.9/topics/testing/overview/)** 文档中有详细说明。
 
-你也可以使用任何其他的`Python`测试框架，`Django`提供了一个`API`和一些工具来帮助你把其他测试框架集成到`Django`中。具体做法可以参考文档**[Advanced testing topics](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)**中的**[使用其他测试框架](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#other-testing-frameworks)**章节。
+你也可以使用任何其他的`Python`测试框架，`Django`提供了一个`API`和一些工具来帮助你把其他测试框架集成到`Django`中。具体做法可以参考文档**[进阶测试专题](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)**中的**[使用其他测试框架](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/#other-testing-frameworks)**章节。
 
 ----------------
 
@@ -30,5 +30,5 @@
 
 - [Django中编写和执行测试](http://xuweitao.me/djangozhong-bian-xie-he-zhi-xing-ce-shi.html)
 - [测试工具 - 测试客户端](http://xuweitao.me/djangoce-shi-gong-ju-zhi-ce-shi-ke-hu-duan.html)
-- [Advanced testing topics](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)
+- [进阶测试专题](https://docs.djangoproject.com/en/1.9/topics/testing/advanced/)
 
